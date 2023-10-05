@@ -361,9 +361,11 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function moveElements(oldElement, newElement, outerDiv) {
-      oldElement.parentNode.insertBefore(outerDiv, oldElement);
-      oldElement.parentNode.removeChild(oldElement);
-      outerDiv.appendChild(newElement);
+      if (oldElement && oldElement.parentNode && outerDiv) {
+        oldElement.parentNode.insertBefore(outerDiv, oldElement);
+        oldElement.parentNode.removeChild(oldElement);
+        outerDiv.appendChild(newElement);
+      }
     }
 
     elements.forEach((element) => {
@@ -383,7 +385,10 @@ window.addEventListener("DOMContentLoaded", function () {
       const innerDiv = createInnerDiv(titleEl, title, element);
       const outerDiv = createOuterDiv(innerDiv, title);
       const paragraphElement = convertElementToParagraph(element);
-      moveElements(element, paragraphElement, outerDiv);
+
+      if (element && paragraphElement && outerDiv) {
+        moveElements(element, paragraphElement, outerDiv);
+      }
     });
   }
 
