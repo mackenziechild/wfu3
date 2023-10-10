@@ -1,12 +1,16 @@
 document.addEventListener("DOMContentLoaded", function () {
   const sidebar = document.querySelector(".sidebar");
+  const sidebarState = localStorage.getItem("sidebarState");
   const mobileMenuBtn = document.getElementById("mobile-menu");
   const mobileMenu = document.querySelector(".sidebar_mobile-wrap");
   const bgCloseDiv = document.getElementById("mobileBgClose");
   sidebar.classList.add("no-transition");
 
-  if (localStorage.getItem("sidebarState") === "opened" || sidebar === null) {
+  if (sidebarState === "opened") {
     sidebar.classList.add("opened");
+  } else if (sidebarState === null) {
+    sidebar.classList.add("opened");
+    localStorage.setItem("sidebarState", "opened");
   }
 
   document.documentElement.style.visibility = "";
