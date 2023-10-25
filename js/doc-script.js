@@ -87,8 +87,14 @@ window.addEventListener("DOMContentLoaded", function () {
         if (tooltip) {
           tooltip.innerText = `Copied!`;
           addClass(tooltip, "active");
-          const anchorLink =
-            window.location.href.replace(window.location.hash, "") + "#" + id;
+          
+          // Create the URL by grabbing the window's href
+          // removing the query param
+          // and appending the ID of the selected anchor link
+          const url = new URL(window.location.href);
+          url.searchParams.delete("topic");
+          const anchorLink = `${url.origin}${url.pathname}#${id}`;
+          
           if (navigator && navigator.clipboard) {
             navigator.clipboard.writeText(anchorLink).catch((err) => {
               console.error("Could not copy text: ", err);
@@ -398,7 +404,6 @@ window.addEventListener("DOMContentLoaded", function () {
   );
 
   addCallout(calloutElements);
-  console.log(addCallout(calloutElements));
 
   // FONT SIZE BUTTONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
