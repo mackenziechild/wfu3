@@ -157,8 +157,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Redirect to the new URL or update the browser's address bar as needed
     window.history.pushState({}, "", urlWithTopic);
-
-    console.log(`Appended topic to URL: ${urlWithTopic}`);
   }
 
   // Call the appendTopicToURL function after the page loads
