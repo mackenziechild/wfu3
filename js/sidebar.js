@@ -1,16 +1,76 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const simulateCookieFailure = false; // Change to false to turn off the simulation
+
   const sidebar = document.querySelector(".sidebar");
-  const sidebarState = localStorage.getItem("sidebarState");
   const mobileMenuBtn = document.getElementById("mobile-menu");
   const mobileMenu = document.querySelector(".sidebar_mobile-wrap");
   const bgCloseDiv = document.getElementById("mobileBgClose");
   sidebar.classList.add("no-transition");
 
+  // Set domain for cookies
+  let currentDomain =
+    window.location.hostname === "wfu3.webflow.io"
+      ? "wfu3.webflow.io"
+      : ".webflow.com";
+
+  // Test to see if cookies are enabled
+  function checkCookieEnabled() {
+    if (simulateCookieFailure) {
+      return false;
+    }
+
+    // Try to set a test cookie
+    document.cookie =
+      "testcookie=1; expires=Wed, 01-Jan-2070 00:00:01 GMT; path=/";
+
+    // Try to get the test cookie
+    const isEnabled = document.cookie.indexOf("testcookie") !== -1;
+
+    // Delete the test cookie
+    document.cookie =
+      "testcookie=; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/";
+
+    return isEnabled;
+  }
+
+  const isCookieEnabled = checkCookieEnabled();
+
+  // Function to get the current sidebarState
+  const getSidebarState = () =>
+    Cookies.get("wfu-sidebarState") || localStorage.getItem("sidebarState");
+
+  // Function to set the sidebarState
+  const setSidebarState = (value) => {
+    try {
+      if (simulateCookieFailure) {
+        throw new Error("Simulating cookie failure");
+      }
+      Cookies.set("wfu-sidebarState", value, {
+        expires: 365,
+        domain: currentDomain
+      });
+    } catch (e) {
+      localStorage.setItem("sidebarState", value);
+    }
+  };
+
+  // Check if sidebarState is set in local storage
+  // if true && cookies are enabled, swap it to use cookies instead
+  const localStoragesidebarState = localStorage.getItem("sidebarState");
+  if (localStoragesidebarState && isCookieEnabled) {
+    setSidebarState(localStoragesidebarState);
+    localStorage.removeItem("sidebarState"); // Remove from local storage
+  }
+
+  // Check the sidebar state & apply a class of "opened"
+  // Set storage if sidebarState is null
+  const sidebarState = getSidebarState();
+
   if (sidebarState === "opened") {
     sidebar.classList.add("opened");
   } else if (sidebarState === null) {
     sidebar.classList.add("opened");
-    localStorage.setItem("sidebarState", "opened");
+    setSidebarState("opened");
   }
 
   document.documentElement.style.visibility = "";
@@ -53,11 +113,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Toggle the sidebar
     sidebar.classList.toggle("opened");
 
-    // Save the state to local storage
+    // Save the sidebarState
     if (sidebar.classList.contains("opened")) {
-      localStorage.setItem("sidebarState", "opened");
+      setSidebarState("opened");
     } else {
-      localStorage.setItem("sidebarState", "minimized");
+      setSidebarState("minimized");
     }
 
     // Remove the overflow hidden after a delay to allow the animation to complete
@@ -87,10 +147,8 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("resize", function () {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (
-        window.innerWidth < 1296 &&
-        localStorage.getItem("sidebarState") === "opened"
-      ) {
+      const currentSidebarState = getSidebarState();
+      if (window.innerWidth < 1296 && currentSidebarState === "opened") {
         sidebar.style.overflow = "hidden";
         sidebar.style.transition =
           "width 0.35s cubic-bezier(0.8, 0.1, 0.38, 0.88)";
@@ -100,10 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
           sidebar.style.overflow = "";
           sidebar.style.transition = "";
         }, 600);
-      } else if (
-        window.innerWidth > 1296 &&
-        localStorage.getItem("sidebarState") === "opened"
-      ) {
+      } else if (window.innerWidth > 1296 && currentSidebarState === "opened") {
         sidebar.style.overflow = "hidden";
         sidebar.style.transition =
           "width 0.35s cubic-bezier(0.8, 0.1, 0.38, 0.88)";
@@ -117,10 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 200);
   });
 
-  if (
-    window.innerWidth < 1296 &&
-    localStorage.getItem("sidebarState") === "opened"
-  ) {
+  if (window.innerWidth < 1296 && getSidebarState() === "opened") {
     sidebar.classList.remove("opened");
   }
 
