@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const simulateCookieFailure = false; // Change to false to turn off the simulation
-
   const sidebar = document.querySelector(".sidebar");
   const mobileMenuBtn = document.getElementById("mobile-menu");
   const mobileMenu = document.querySelector(".sidebar_mobile-wrap");
@@ -15,10 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Test to see if cookies are enabled
   function checkCookieEnabled() {
-    if (simulateCookieFailure) {
-      return false;
-    }
-
     // Try to set a test cookie
     document.cookie =
       "testcookie=1; expires=Wed, 01-Jan-2070 00:00:01 GMT; path=/";
@@ -42,9 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to set the sidebarState
   const setSidebarState = (value) => {
     try {
-      if (simulateCookieFailure) {
-        throw new Error("Simulating cookie failure");
-      }
       Cookies.set("wfu-sidebarState", value, {
         expires: 365,
         domain: currentDomain
