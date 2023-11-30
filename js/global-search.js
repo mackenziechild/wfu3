@@ -2,65 +2,36 @@ document.addEventListener("DOMContentLoaded", function () {
   const searchWrapper = document.querySelector(".g_search-wrapper");
   const searchCloseBg = document.querySelector(".g_search-close-bg");
   const searchInput = document.getElementById("g-search");
-  const searchForumBtn = document.getElementById("search-forum-btn");
-  const searchResultsContainer = document.querySelector(
-    ".jetboost-list-wrapper-5j4q .cc_list-wrap"
-  );
-
-  let listItems = [];
-  let activeIndex = -1;
-
-  // Observer to monitor changes in search results
-  const observer = new MutationObserver(() => {
-    listItems = Array.from(
-      searchResultsContainer.querySelectorAll("[role='listitem']")
-    )
-      .map((item) =>
-        item.querySelector(".cc_list-item:not(.w-condition-invisible)")
-      )
-      .filter((item) => item !== null);
-  });
-
-  if (searchResultsContainer) {
-    observer.observe(searchResultsContainer, { childList: true });
-  }
 
   // Toggle search open & closed
   function toggleSearch() {
+    // Toggle the active class
     searchWrapper.classList.toggle("active");
+    // Stop the body from scrolling
     document.documentElement.style.overflow = searchWrapper.classList.contains(
-      "active"
+      "active",
     )
       ? "hidden"
       : "";
+
     if (searchWrapper.classList.contains("active")) {
       searchInput.focus();
-    } else {
-      clearActiveItem();
-      activeIndex = -1;
     }
   }
 
-  // Focus item functionality
-  function focusItem(index) {
-    if (activeIndex >= 0) {
-      listItems[activeIndex].classList.remove("active");
-      listItems[activeIndex].blur();
-    }
-    if (index === -1) {
-      searchInput.focus();
-      return;
-    }
-    activeIndex = index;
-    listItems[activeIndex].classList.add("active");
-    listItems[activeIndex].focus();
-  }
-
-  function clearActiveItem() {
-    if (activeIndex >= 0) {
-      listItems[activeIndex].classList.remove("active");
-    }
-  }
+  // Close the search modal
+  const closeSearch = () => {
+    setTimeout(() => {
+      searchWrapper.classList.remove("active");
+      document.documentElement.style.overflow = "";
+      searchInput.value = "";
+      const event = new Event("input", {
+        bubbles: true,
+        cancelable: true,
+      });
+      searchInput.dispatchEvent(event);
+    }, 100);
+  };
 
   // Keyboard event handling, including the new ArrowDown and ArrowUp
   document.addEventListener("keydown", function (event) {
@@ -68,28 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
       (event.key === "k" || event.key === "e") &&
       (event.ctrlKey || event.metaKey)
     ) {
-      toggleSearch();
-    } else if (event.key === "Escape") {
-      searchWrapper.classList.remove("active");
-      document.documentElement.style.overflow = "";
-      searchInput.value = "";
-      document.querySelector(".jetboost-list-search-reset-5j4q").click();
-      clearActiveItem();
-      activeIndex = -1;
-    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      // Only proceed if the searchResultsContainer is not hidden
-      if (
-        !document
-          .querySelector(".jetboost-list-wrapper-5j4q")
-          .classList.contains("jetboost-list-item-hide")
-      ) {
-        event.preventDefault();
-        if (event.key === "ArrowDown") {
-          focusItem(activeIndex < listItems.length - 1 ? activeIndex + 1 : 0);
-        } else {
-          focusItem(activeIndex > 0 ? activeIndex - 1 : -1);
-        }
+      if (!searchWrapper.classList.contains("active")) {
+        toggleSearch();
       }
+    } else if (event.key === "Escape") {
+      closeSearch();
     }
   });
 
@@ -99,64 +53,90 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Find all .open-search
   document.querySelectorAll(".open-search").forEach((element) => {
     element.addEventListener("click", function () {
       toggleSearch();
     });
   });
 
-  searchCloseBg.addEventListener("click", function () {
-    searchWrapper.classList.remove("active");
-    document.documentElement.style.overflow = "";
-    searchInput.value = "";
-    clearActiveItem();
-    activeIndex = -1;
-    document.querySelector(".jetboost-list-search-reset-5j4q").click();
-  });
+  searchCloseBg.addEventListener("click", closeSearch);
 
-  // Reset activeIndex when search input gains focus
-  searchInput.addEventListener("focus", function () {
-    clearActiveItem();
-    activeIndex = -1;
-  });
+  // MutationObserver to watch for the Swiftype elements
+  const config = { childList: true, subtree: true };
 
-  // NO RESULTS - - - - - - - - - - - - - - - - - - 👇
-  const searchQuery = searchInput.value.trim() || getSearchQuery();
+  // Callback function to execute when mutations are observed
+  const callback = function (mutationsList, observer) {
+    const stCloseBtn = document.querySelector(".st-ui-close-button");
+    const stUiOverlay = document.querySelector(".st-ui-overlay");
+    const autocompleteElement = document.querySelector(
+      ".st-default-autocomplete .st-query-present",
+    );
 
-  function getSearchQuery() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("search-5j4q") || "";
-  }
+    if (stCloseBtn && stUiOverlay) {
+      // Add event listener to the close button
+      stCloseBtn.addEventListener("click", closeSearch);
 
-  function updateSearchQueryText(searchQuery) {
-    const queryElement = document.getElementById("g-search-query-text");
+      // Add event listener to the overlay
+      stUiOverlay.addEventListener("click", closeSearch);
+    }
 
-    if (searchQuery && queryElement) {
-      queryElement.textContent = decodeURIComponent(searchQuery);
-    } else if (queryElement) {
-      queryElement.textContent = decodeURIComponent(searchQuery);
+    if (autocompleteElement) {
+      // Adjust max height of the autocomplete element
+      adjustMaxHeight();
+
+      // Add resize listener for the autocomplete element
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", adjustMaxHeight);
+      } else {
+        window.addEventListener("resize", adjustMaxHeight);
+      }
+    }
+
+    if (stCloseBtn && stUiOverlay && autocompleteElement) {
+      // Once we have found the elements and added the event listeners, we don't need the observer anymore
+      observer.disconnect();
+    }
+  };
+
+  // Adjust height of the autocomplete container based
+  // on viewport height, including mobile keyboard
+  function adjustMaxHeight() {
+    // Define different offsets for mobile and desktop
+    const mobileOffset = 150; // Adjust this value as needed for mobile
+    const desktopOffset = 220; // Adjust this value as needed for desktop
+
+    // Use a width threshold to differentiate between mobile and desktop
+    const mobileWidthThreshold = 768; // Common threshold for mobile devices
+
+    // Determine the current viewport width
+    const viewportWidth = window.innerWidth;
+
+    // Choose the offset based on the viewport width
+    const currentOffset =
+      viewportWidth < mobileWidthThreshold ? mobileOffset : desktopOffset;
+
+    // Calculate adjusted max height
+    let viewportHeight = window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
+    const adjustedMaxHeight = viewportHeight - currentOffset;
+
+    // Apply the adjusted max height
+    const autocompleteElement = document.querySelector(
+      ".st-default-autocomplete .st-query-present",
+    );
+    if (autocompleteElement) {
+      autocompleteElement.style.maxHeight = adjustedMaxHeight + "px";
     }
   }
 
-  // Event listener for the search input to update the text content
-  searchInput.addEventListener("input", () => {
-    updateSearchQueryText(searchInput.value);
-  });
+  // Create an instance of the observer with the callback function
+  const observer = new MutationObserver(callback);
 
-  function redirectToForum() {
-    // const searchQuery = searchInput.value || getSearchQuery();
-    if (searchQuery) {
-      const forumURL = "https://discourse.webflow.com/search?";
-      window.location.href = `${forumURL}q=${searchQuery}`;
-    }
-  }
+  // Select the node that will be observed for mutations
+  const targetNode = document.body;
 
-  searchForumBtn.addEventListener("click", redirectToForum);
-
-  // Get the search query from the URL and update
-  // both the search input and the display text
-  if (searchQuery) {
-    searchInput.value = decodeURIComponent(searchQuery);
-    updateSearchQueryText(searchQuery);
-  }
+  // Start observing the target node for configured mutations
+  observer.observe(targetNode, config);
 });
