@@ -175,9 +175,9 @@ window.addEventListener("DOMContentLoaded", function () {
     // Define the Link Icon SVG
     const linkIcon = `
       <svg width="0.5em" height="0.5em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17 13.25L18.25 12C19.9069 10.3431 19.9069 7.65684 18.25 5.99999C16.5931 4.34314 13.9069 4.34314 12.25 5.99999L11 7.24999" stroke-width="1.5" stroke="var(--text-primary)" stroke-linecap="square" stroke-linejoin="bevel"/>
-        <path d="M7.50002 10.75L6.25002 12C4.59317 13.6569 4.59317 16.3431 6.25002 18C7.90687 19.6569 10.5931 19.6569 12.25 18L13.5 16.75" stroke-width="1.5" stroke="var(--text-primary)" stroke-linecap="square" stroke-linejoin="bevel"/>
-        <path d="M14.5 9.75L10 14.25" stroke-width="1.5" stroke="var(--text-primary)" stroke-linecap="square" stroke-linejoin="bevel"/>
+        <path d="M17 13.25L18.25 12C19.9069 10.3431 19.9069 7.65684 18.25 5.99999C16.5931 4.34314 13.9069 4.34314 12.25 5.99999L11 7.24999" stroke-width="1.5" stroke="currentColor" stroke-linecap="square" stroke-linejoin="bevel"/>
+        <path d="M7.50002 10.75L6.25002 12C4.59317 13.6569 4.59317 16.3431 6.25002 18C7.90687 19.6569 10.5931 19.6569 12.25 18L13.5 16.75" stroke-width="1.5" stroke="currentColor" stroke-linecap="square" stroke-linejoin="bevel"/>
+        <path d="M14.5 9.75L10 14.25" stroke-width="1.5" stroke="currentColor" stroke-linecap="square" stroke-linejoin="bevel"/>
       </svg>
     `;
     // Set the link icon inside the anchorLinkBox
