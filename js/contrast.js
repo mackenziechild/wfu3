@@ -29,11 +29,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const isCookieEnabled = checkCookieEnabled();
 
-  // Function to get the current sidebarState
+  // Function to get the current contrast
   const getContrastStorage = () =>
     Cookies.get("wfu-contrast") || localStorage.getItem("contrast");
 
-  // Function to set the sidebarState
+  // Function to set the contrast
   const setContrastStorage = (value) => {
     try {
       Cookies.set("wfu-contrast", value, {
