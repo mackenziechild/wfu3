@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // If only one card, apply rounded corners all around
     if (courseCards.length === 1) {
       courseCards[0].style.borderRadius = "0.25rem";
-      courseCards[0].style.borderBottom = "1px solid var(--border-primary)";
+      courseCards[0].style.borderBottom = "1px solid var(--theme--t_border-primary)";
       return;
     }
 
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
       courseCards[courseCards.length - 1].style.borderRadius =
         "0 0 0.25rem 0.25rem";
       courseCards[courseCards.length - 1].style.borderBottom =
-        "1px solid var(--border-primary)";
+        "1px solid var(--theme--t_border-primary)";
     }
   };
 
